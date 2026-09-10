@@ -5697,6 +5697,9 @@ static_library("ui") {
       "//custom_browser/browser/nexus:guest_config",
       "//custom_browser/browser/nexus:nexus_settings_handler",
       "//custom_browser/browser/nexus:nexus_webui_config",
+      # CustomBrowserWebUIView parks / reclaims the kNexus top-chrome
+      # WebContents across window closes through this leaf service.
+      "//custom_browser/browser/nexus/panel:background_panel_host",
       "//custom_browser/common:common",
       "//custom_browser/extensions:component_extensions",
       "//custom_browser/resources:custom_browser_strings",

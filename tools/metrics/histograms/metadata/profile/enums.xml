@@ -384,6 +384,7 @@ chromium-metrics-reviews@google.com.
   <int value="42" label="kWaitingForBookmarksImportOnFirstRun"/>
   <int value="43" label="kSkillsDialog"/>
   <int value="44" label="kWebAppDatabaseCorruptionRecovery"/>
+  <int value="45" label="kNexusBackgroundPanel"/>
 </enum>
 
 <!-- LINT.IfChange(ProfileManagementFlowStep) -->

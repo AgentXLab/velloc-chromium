@@ -183,7 +183,13 @@ enum class ProfileKeepAliveOrigin {
   // Used during WebApp database cleanup from corruption
   kWebAppDatabaseCorruptionRecovery = 44,
 
-  kMaxValue = kWebAppDatabaseCorruptionRecovery,
+  // custom_browser (Velloc): held by nexus::NexusBackgroundPanelHost while the
+  // kNexus window's top-chrome WebContents is parked without a window
+  // (System > "Continue running background apps"). See
+  // //custom_browser/browser/nexus/panel.
+  kNexusBackgroundPanel = 45,
+
+  kMaxValue = kNexusBackgroundPanel,
 };
 // LINT.ThenChange(/tools/metrics/histograms/metadata/profile/enums.xml)
 
