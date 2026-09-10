@@ -78,6 +78,10 @@
 #include "chrome/common/chrome_constants.h"
 #include "chrome/common/chrome_features.h"
 #include "chrome/common/chrome_switches.h"
+#include "custom_browser/buildflags.h"
+#if BUILDFLAG(ENABLE_CUSTOM_BROWSER)
+#include "custom_browser/ui/view/custom_browser_window_util.h"
+#endif
 #include "chrome/common/pref_names.h"
 #include "chrome/common/url_constants.h"
 #include "components/prefs/pref_registry_simple.h"
@@ -1478,6 +1482,19 @@ void StartupBrowserCreator::ProcessCommandLineWithProfile(
     // Return early to prevent opening a new browser window.
     return;
   }
+
+#if BUILDFLAG(ENABLE_CUSTOM_BROWSER)
+  // custom-browser: a plain relaunch (bare exe — the desktop / taskbar icon
+  // clicked while the process is alive, e.g. kept alive by the launcher tray)
+  // focuses or reopens the profile's kNexus window instead of falling through
+  // to a fresh normal browser window. URL opens, --app, --incognito etc. are
+  // not plain relaunches and keep Chromium's handling below.
+  if (mode == StartupProfileMode::kBrowserWindow &&
+      custom_browser::window_util::HandlePlainRelaunch(profile,
+                                                       command_line)) {
+    return;
+  }
+#endif
 
   Profiles last_opened_profiles;
 #if !BUILDFLAG(IS_CHROMEOS)
