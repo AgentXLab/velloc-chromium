@@ -385,6 +385,11 @@ class AddressTrackerLinux;
 class PemFileCertStore;
 }  // namespace internal
 }  // namespace net
+// ENABLE_CUSTOM_BROWSER: forward declaration for the friend entry below (the
+// Nexus remote-access listener's bounded bind/join wait).
+namespace nexus::remote_access {
+class NexusRemoteAccessListener;
+}  // namespace nexus::remote_access
 namespace printing {
 class LocalPrinterHandlerDefault;
 #if BUILDFLAG(IS_MAC)
@@ -887,6 +892,16 @@ class BASE_EXPORT
   friend class ::tracing::EmergencyTraceFinalisationCoordinator;
   friend class ui::DrmThreadProxy;
   friend class vr::VrShell;
+  // ENABLE_CUSTOM_BROWSER hook (unguarded friend declaration, matching this
+  // file's convention; ENABLE_CUSTOM_BROWSER is not a buildflag visible to
+  // //base). The Nexus remote-access listener's Start()/Stop() synchronously
+  // wait on a WaitableEvent for the listener thread's bind/unbind to preserve
+  // the synchronous result contract (port_in_use must be known immediately —
+  // plan SS8.3). That wait runs on the UI thread inside BrowserMainLoop's
+  // DisallowUnresponsiveTasks scope at cold boot, so Start()/Stop() wrap ONLY
+  // the Wait() in ScopedAllowBaseSyncPrimitivesOutsideBlockingScope.
+  // See custom_browser/browser/nexus/remote_access/nexus_remote_access_listener.cc.
+  friend class nexus::remote_access::NexusRemoteAccessListener;
 
   // Usage that should be fixed:
   friend class ::ash::system::StatisticsProviderImpl;  // http://b/261818124
