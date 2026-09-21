@@ -48,7 +48,7 @@
 
 #include "custom_browser/buildflags.h"
 #if BUILDFLAG(ENABLE_CUSTOM_BROWSER)
-#include "custom_browser/ui/view/view_chain_visibility.h"
+#include "custom_browser/ui/view/view_visible_bounds.h"
 #endif
 
 namespace {
@@ -234,16 +234,20 @@ void HandoffButtonController::UpdateState(HandoffButtonState state,
   }
   is_visible_ = is_visible;
 #if BUILDFLAG(ENABLE_CUSTOM_BROWSER)
-  // custom-browser: bind the button to the visibility of the contents area it
-  // controls. In the kNexus window the contents container is a per-session
-  // overlay that the layout hides (SetVisible(false)) while the active chat
-  // session owns no tab here; a *background* session's actor task still has
-  // its tab selected in the strip, so `is_visible` (IsSelected-based) is true
-  // while nothing of that tab is on screen. Without this the pause / "Take
-  // over task" widget floats over the chat UI for a browser view the user
-  // cannot see. Re-evaluated on every container visibility flip via
-  // ActorUiContentsContainerController::OnViewVisibilityChanged.
-  if (is_visible_ && !custom_browser::IsViewChainVisible(anchor_view_)) {
+  // custom-browser: bind the button to whether the contents area it controls
+  // is on screen. In the kNexus window the contents container is a
+  // per-session overlay: the layout hides it (SetVisible(false)) while the
+  // active chat session owns no tab here, and before the first visible
+  // <main-contents-view> report it is still Chromium's initial visible 0x0.
+  // A background or scoped session's actor task still has its tab selected in
+  // the strip, so `is_visible` (IsSelected-based) is true while nothing of
+  // that tab is on screen. Without this the pause / "Take over task" widget
+  // floats over the chat UI for a browser view the user cannot see. The
+  // anchor's visible bounds cover both states (view_visible_bounds.h).
+  // Re-evaluated on every container visibility flip via
+  // ActorUiContentsContainerController::OnViewVisibilityChanged, and on every
+  // anchor resize via OnViewBoundsChanged.
+  if (is_visible_ && !custom_browser::HasVisibleBounds(anchor_view_)) {
     is_visible_ = false;
   }
 #endif

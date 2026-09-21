@@ -324,7 +324,7 @@ source_set("ui") {
       # custom-browser: buildflag for the handoff-button visibility hook
       # (handoff_button_controller.cc / actor_ui_window_controller.cc). The
       # predicate itself is header-only (//custom_browser/ui/view/
-      # view_chain_visibility.h) and needs no target.
+      # view_visible_bounds.h) and needs no target.
       deps += [ "//custom_browser:buildflags" ]
     }
 
