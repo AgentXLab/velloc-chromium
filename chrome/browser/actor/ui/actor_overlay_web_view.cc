@@ -16,6 +16,8 @@
 #include "ui/views/controls/webview/web_contents_set_background_color.h"
 #include "ui/views/view_class_properties.h"
 
+#include "custom_browser/buildflags.h"
+
 ActorOverlayWebView::ActorOverlayWebView(BrowserWindowInterface* browser)
     : browser_(browser) {
   // Required to create a new web contents if one doesn't exist.
@@ -99,6 +101,28 @@ void ActorOverlayWebView::MoveCursorTo(const gfx::Point& point,
   if (!base::FeatureList::IsEnabled(features::kGlicActorUiMagicCursor)) {
     return;
   }
+#if BUILDFLAG(ENABLE_CUSTOM_BROWSER)
+  // custom-browser: do not gate the action on an animation nobody can see.
+  // The page resolves the move on the cursor's CSS `transitionend` and the
+  // click on `animationend`, and nothing else resolves them
+  // (crbug.com/454339982). In the kNexus window this overlay sits in the
+  // contents container, and while no guest shows the agent's tab (a
+  // background chat session, or a session driven only by a scoped runtime
+  // connection such as a remote client) that container is either hidden by
+  // the layout or, if no <main-contents-view> layout ever arrived, still at
+  // its initial 0x0. Either way the overlay has no visible bounds, the same
+  // test NativeViewHost uses to hide the native view, and an overlay page
+  // with no pixels on screen never finishes the animation. ExecutionEngine
+  // then never leaves kUiPreInvoke and the click / type waits out the whole
+  // tool budget before it is dispatched. ShowUI() forces the overlay
+  // WebContents visible (WasShown()), so its GetVisibility() cannot tell.
+  // Returning here lets `runner` complete the step. Chromium enables the
+  // magic cursor only through the fieldtrial testing config, so this shows
+  // in Debug builds (and the e2e suite), not in an official build.
+  if (GetVisibleBounds().IsEmpty()) {
+    return;
+  }
+#endif
   if (actor::ui::ActorOverlayUI* web_ui = GetWebUi()) {
     web_ui->MoveCursorTo(point, runner.Release());
   }
@@ -111,6 +135,13 @@ void ActorOverlayWebView::TriggerClickAnimation(base::OnceClosure callback) {
   if (!base::FeatureList::IsEnabled(features::kGlicActorUiMagicCursor)) {
     return;
   }
+#if BUILDFLAG(ENABLE_CUSTOM_BROWSER)
+  // custom-browser: same reason as MoveCursorTo; an overlay with no visible
+  // bounds never fires `animationend`.
+  if (GetVisibleBounds().IsEmpty()) {
+    return;
+  }
+#endif
   if (actor::ui::ActorOverlayUI* web_ui = GetWebUi()) {
     web_ui->TriggerClickAnimation(runner.Release());
   }

@@ -97,6 +97,11 @@ if (!is_android) {
       "//ui/views",
       "//ui/views/controls/webview",
     ]
+    if (enable_custom_browser) {
+      # custom-browser: buildflag for the hidden-overlay hook in
+      # MoveCursorTo / TriggerClickAnimation.
+      deps += [ "//custom_browser:buildflags" ]
+    }
   }
 }
 
