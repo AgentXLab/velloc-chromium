@@ -187,6 +187,7 @@
 #include "content/public/common/content_switches.h"
 #include "content/public/common/url_constants.h"
 #include "content/public/common/url_utils.h"
+#include "custom_browser/buildflags.h"
 #include "extensions/buildflags/buildflags.h"
 #include "pdf/buildflags.h"
 #include "printing/buildflags/buildflags.h"
@@ -199,6 +200,10 @@
 #include "ui/events/keycodes/keyboard_codes.h"
 #include "url/gurl.h"
 #include "url/url_constants.h"
+
+#if BUILDFLAG(ENABLE_CUSTOM_BROWSER)
+#include "custom_browser/ui/view/nexus_quit_confirmation.h"
+#endif
 
 #if BUILDFLAG(ENABLE_EXTENSIONS)
 #include "chrome/browser/ui/extensions/app_launch_params.h"
@@ -1758,8 +1763,18 @@ void CloseOtherTabs(BrowserWindowInterface* browser) {
 }
 
 void Exit() {
+#if BUILDFLAG(ENABLE_CUSTOM_BROWSER)
+  // custom_browser (Velloc): while remote-access devices are connected, ask
+  // before quitting disconnects them. With none connected this runs the
+  // upstream body synchronously, unchanged.
+  custom_browser::ConfirmQuitWithRemoteDevices(base::BindOnce([] {
+    base::RecordAction(UserMetricsAction("Exit"));
+    chrome::AttemptUserExit();
+  }));
+#else
   base::RecordAction(UserMetricsAction("Exit"));
   chrome::AttemptUserExit();
+#endif  // BUILDFLAG(ENABLE_CUSTOM_BROWSER)
 }
 
 void BookmarkCurrentTab(BrowserWindowInterface* browser) {

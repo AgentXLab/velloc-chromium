@@ -4929,6 +4929,9 @@ static_library("ui") {
       deps += [
         "//custom_browser:buildflags",
         "//custom_browser/browser/nexus/launcher:delegate",
+        # nexus_quit_confirmation.cc (tray Quit / app-menu Exit) reads the
+        # connected remote-access devices from this //base-only leaf.
+        "//custom_browser/browser/nexus:remote_access_clients",
       ]
     }
     sources += get_target_outputs(":webui_name_variants")
