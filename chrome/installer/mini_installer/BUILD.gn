@@ -156,6 +156,7 @@ action("mini_installer_archive") {
     "$root_out_dir/chrome.exe",
     "$root_out_dir/locales/en-US.pak",
     "$root_out_dir/custom_browser_strings_en-US.pak",
+    "$root_out_dir/rg.exe",
     "$root_out_dir/setup.exe",
     "$root_gen_dir/custom_browser/common/generated/custom_browser_version.txt",
     "//chrome/tools/build/win/makecab.py",
@@ -209,6 +210,7 @@ action("mini_installer_archive") {
     "//third_party/icu:icudata",
     "//custom_browser/resources:custom_browser_strings_pak",
     "//custom_browser/common:generate_product_version",
+    "//custom_browser/installer:bundled_binaries",
   ]
 
   if (enable_hidpi) {
