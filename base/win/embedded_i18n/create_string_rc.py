@@ -74,6 +74,23 @@ sys.path.insert(2, os.path.join(BASEDIR, '../../../tools/python'))
 
 from grit.extern import tclib
 
+
+def _BrandForCustomBrowser(translated_strings):
+  """custom_browser (ENABLE_CUSTOM_BROWSER): this script reads the .grd/.xtb
+  without GRIT, so GRIT's branding patch never sees these strings. Apply the
+  same rules here (custom_browser/resources/grit/installer_strings_brand.py).
+  Actions run in the build dir, whose args.gn decides; a no-op elsewhere."""
+  module_dir = os.path.join(BASEDIR, '../../../custom_browser/resources/grit')
+  if not os.path.isfile(os.path.join(module_dir, 'installer_strings_brand.py')):
+    return
+  sys.path.insert(0, os.path.abspath(module_dir))
+  import installer_strings_brand
+  brand = installer_strings_brand.make_brander(os.getcwd())
+  if brand:
+    for data in translated_strings:
+      data.translation = brand(data.translation, data.language)
+
+
 class GrdHandler(sax.handler.ContentHandler):
   """Extracts selected strings from a .grd file.
 
@@ -306,6 +323,7 @@ class StringRcMaker(object):
 
   def MakeFiles(self):
     translated_strings = self.__ReadSourceAndTranslatedStrings()
+    _BrandForCustomBrowser(translated_strings)
     self.__WriteRCFile(translated_strings)
     self.__WriteHeaderFile(translated_strings)
 

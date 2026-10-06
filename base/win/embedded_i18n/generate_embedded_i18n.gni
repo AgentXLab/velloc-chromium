@@ -135,6 +135,16 @@ template("generate_embedded_i18n") {
       }
     }
 
+    if (enable_custom_browser) {
+      # create_string_rc.py brands the strings with these (its
+      # _BrandForCustomBrowser hook).
+      inputs += [
+        "//custom_browser/resources/grit/branding/replacer.py",
+        "//custom_browser/resources/grit/config/branding.json",
+        "//custom_browser/resources/grit/installer_strings_brand.py",
+      ]
+    }
+
     if (defined(extractor_datafile)) {
       inputs += [ extractor_datafile ]
 
