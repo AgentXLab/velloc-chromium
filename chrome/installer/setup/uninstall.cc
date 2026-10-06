@@ -36,6 +36,7 @@
 #include "base/win/shortcut.h"
 #include "build/branding_buildflags.h"
 #include "chrome/chrome_elf/blocklist_constants.h"
+#include "chrome/common/buildflags.h"
 #include "chrome/common/chrome_constants.h"
 #include "chrome/common/chrome_paths.h"
 #include "chrome/common/chrome_result_codes.h"
@@ -68,6 +69,10 @@
 #include "content/public/common/result_codes.h"
 #include "rlz/lib/rlz_lib_clear.h"
 #include "rlz/lib/supplementary_branding.h"
+
+#if BUILDFLAG(ENABLE_CUSTOM_BROWSER)
+#include "custom_browser/installer/uninstall_data.h"
+#endif
 
 using base::win::RegKey;
 
@@ -1111,6 +1116,10 @@ InstallStatus UninstallProduct(const ModifyParams& modify_params,
   if (delete_profile) {
     DeleteUserDataDir(user_data_dir);
     RemoveDistributionRegistryState();
+#if BUILDFLAG(ENABLE_CUSTOM_BROWSER)
+    // The product's own data lives outside the profile, in ~/.velloc.
+    custom_browser::installer::DeleteNexusRuntimeData();
+#endif
   }
 
   if (!force_uninstall && product_state) {

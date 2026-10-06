@@ -121,6 +121,14 @@ if (is_win) {
       "//ui/base:fullscreen_win",
     ]
 
+    if (enable_custom_browser) {
+      # uninstall.cc deletes ~/.velloc with the profile.
+      deps += [
+        "//chrome/common:buildflags",
+        "//custom_browser/installer:uninstall_data",
+      ]
+    }
+
     if (webnn_install_runtime_in_chrome_installer) {
       sources += [
         "install_win_app_runtime.cc",

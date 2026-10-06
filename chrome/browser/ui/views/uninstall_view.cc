@@ -8,6 +8,7 @@
 #include "base/task/current_thread.h"
 #include "chrome/browser/ui/uninstall_browser_prompt.h"
 #include "chrome/browser/ui/views/chrome_layout_provider.h"
+#include "chrome/common/buildflags.h"
 #include "chrome/common/chrome_result_codes.h"
 #include "chrome/grit/branded_strings.h"
 #include "ui/base/l10n/l10n_util.h"
@@ -21,6 +22,10 @@
 #include "ui/views/metadata/view_factory.h"
 #include "ui/views/view_class_properties.h"
 #include "ui/views/widget/widget.h"
+
+#if BUILDFLAG(ENABLE_CUSTOM_BROWSER)
+#include "custom_browser/resources/grit/custom_browser_strings.h"
+#endif
 
 UninstallView::UninstallView(int* user_selection,
                              const base::RepeatingClosure& quit_closure)
@@ -68,8 +73,15 @@ void UninstallView::SetupControls() {
               // The "delete profile" check box.
               views::Builder<views::Checkbox>()
                   .CopyAddressTo(&delete_profile_)
-                  .SetText(
-                      l10n_util::GetStringUTF16(IDS_UNINSTALL_DELETE_PROFILE))
+                  .SetText(l10n_util::GetStringUTF16(
+#if BUILDFLAG(ENABLE_CUSTOM_BROWSER)
+                      // Ticking it also deletes ~/.velloc (setup's
+                      // uninstall.cc), so the label says so.
+                      IDS_VELLOC_UNINSTALL_DELETE_ALL_DATA
+#else
+                      IDS_UNINSTALL_DELETE_PROFILE
+#endif
+                      ))
                   .SetProperty(views::kMarginsKey,
                                gfx::Insets::TLBR(0, checkbox_indent, 0, 0)));
 
