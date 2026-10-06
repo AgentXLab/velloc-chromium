@@ -47,6 +47,10 @@
 #include "chrome/installer/util/util_constants.h"
 #include "chrome/installer/util/work_item_list.h"
 
+#if BUILDFLAG(ENABLE_CUSTOM_BROWSER)
+#include "custom_browser/common/branding_constants.h"
+#endif
+
 using base::win::RegKey;
 using installer::ProductState;
 
@@ -68,9 +72,20 @@ void LogStartMenuShortcutStatus(StartMenuShortcutStatus status) {
                             status);
 }
 
+// The product's display name (shortcuts, Apps & features). Not the path
+// component (CUSTOM_BRANDING_PATH_COMPONENT, "Velloc"), which names the install
+// dir and registry keys and stays one token; see branding_constants.h.
 std::wstring GetCustomBrandingName() {
 #if BUILDFLAG(ENABLE_CUSTOM_BROWSER) && !BUILDFLAG(CUSTOM_BRANDING_IS_DEFAULT)
-  return BUILDFLAG(CUSTOM_BRANDING_PATH_COMPONENT_WIDE);
+  return base::UTF8ToWide(custom_browser::kCustomBrowserProductName);
+#else
+  return std::wstring();
+#endif
+}
+
+std::wstring GetCustomPublisherName() {
+#if BUILDFLAG(ENABLE_CUSTOM_BROWSER) && !BUILDFLAG(CUSTOM_BRANDING_IS_DEFAULT)
+  return base::UTF8ToWide(custom_browser::kCustomBrowserPublisherName);
 #else
   return std::wstring();
 #endif
@@ -584,7 +599,7 @@ std::wstring InstallUtil::GetAppDescription() {
 
 // static
 std::wstring InstallUtil::GetPublisherName() {
-  if (const std::wstring name = GetCustomBrandingName(); !name.empty()) {
+  if (const std::wstring name = GetCustomPublisherName(); !name.empty()) {
     return name;
   }
   return installer::GetLocalizedString(IDS_ABOUT_VERSION_COMPANY_NAME_BASE);
