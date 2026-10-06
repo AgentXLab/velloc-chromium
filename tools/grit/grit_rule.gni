@@ -96,6 +96,7 @@
 #     # You can also put deps here if the grit source depends on generated
 #     # files.
 #   }
+import("//build/config/chrome_build.gni")
 import("//build/config/compiler/compiler.gni")
 import("//build/config/compute_inputs_for_analyze.gni")
 import("//build/config/locales.gni")
@@ -192,6 +193,16 @@ template("grit") {
   action_with_pydeps(_grit_custom_target) {
     script = "//tools/grit/grit.py"
     inputs = [ invoker.source ]
+    if (custom_browser_branding) {
+      # grit.py runs every message through custom_browser's branding hook
+      # (init_custom_browser): its rules and display name are inputs too, or
+      # an edit to them never reaches the generated catalogs.
+      inputs += [
+        "//custom_browser/resources/grit/branding/message.py",
+        "//custom_browser/resources/grit/branding/replacer.py",
+        "//custom_browser/resources/grit/config/branding.json",
+      ]
+    }
 
     testonly = defined(invoker.testonly) && invoker.testonly
 
