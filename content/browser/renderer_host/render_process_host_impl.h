@@ -376,6 +376,11 @@ class CONTENT_EXPORT RenderProcessHostImpl
 #endif
   void SetBatterySaverMode(bool battery_saver_mode_enabled) override;
   uint64_t GetPrivateMemoryFootprint() override;
+#if BUILDFLAG(ENABLE_CUSTOM_BROWSER)
+  // Sends `level` to the renderer's memory-pressure listeners on every
+  // platform; no-op until the ChildProcess interface is bound. UI thread.
+  void NotifyMemoryPressureForEmbedder(base::MemoryPressureLevel level);
+#endif
   bool IsOnlyHostingPrerenderedFramesOrEmpty() override;
 
   void PauseSocketManagerForRenderFrameHost(

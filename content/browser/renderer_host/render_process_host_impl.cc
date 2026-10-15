@@ -2900,6 +2900,16 @@ void RenderProcessHostImpl::OnMemoryPressure(
 #endif  // BUILDFLAG(IS_ANDROID)
 }
 
+#if BUILDFLAG(ENABLE_CUSTOM_BROWSER)
+void RenderProcessHostImpl::NotifyMemoryPressureForEmbedder(
+    base::MemoryPressureLevel level) {
+  DCHECK_CURRENTLY_ON(BrowserThread::UI);
+  if (child_process_.is_bound()) {
+    child_process_->OnMemoryPressure(level);
+  }
+}
+#endif  // BUILDFLAG(ENABLE_CUSTOM_BROWSER)
+
 void RenderProcessHostImpl::CreateRendererHost(
     mojo::PendingAssociatedReceiver<mojom::RendererHost> receiver) {
   renderer_host_receiver_.Bind(std::move(receiver));
